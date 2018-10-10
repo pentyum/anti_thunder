@@ -1,0 +1,22 @@
+name: anti_thunder
+main: com.piggest.minecraft.bukkit.anti_thunder.Anti_thunder
+api-version: 1.13
+version: 0.0.1
+author: Pentyum
+commands:
+  anti_thunder:
+    description: place water on your foot.
+    usage: /<command> to place water on your foot or /<command> setprice [world] to change price.
+    permission: anti_thunder.use
+    permission-message: You don't have permission
+permissions:
+  anti_thunder.*:
+    description: Gives access to all placewater commands
+    default: op
+  anti_thunder.use:
+    description: Gives access to place water
+    default: true
+  anti_thunder.changeprice:
+    description: change place water price
+    default: op
+softdepend: [Vault]

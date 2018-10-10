@@ -1,0 +1,6 @@
+use-vault: true
+price: 
+  world: 15
+  world_nether: 15
+  world_the_end: 15
+  other: 15
