@@ -12,6 +12,16 @@ public class Structure_manager {
 		this.plugin = plugin;
 	}
 
+	public boolean add_new_structure(Anti_thunder_structure structure) {
+		Chunk_location chunk_loc = Chunk_location.new_location(structure.get_core_location().getChunk());
+		if (this.anti_thunder_structure_map.get(chunk_loc) != null) {
+			this.anti_thunder_structure_map.put(chunk_loc, structure);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	public void load_anti_thunder_structure_map() {
 		List<Map<?, ?>> structure_list = plugin.get_structure_config().getMapList("anti_thunder");
 		for (Map<?, ?> one_structure : structure_list) {
@@ -29,16 +39,16 @@ public class Structure_manager {
 			this.anti_thunder_structure_map.put(chunk_loc, structure_to_load);
 		}
 	}
-	
+
 	public void remove_structure(Anti_thunder_structure structure) {
 		Chunk_location chunk_loc = Chunk_location.new_location(structure.get_core_block().getChunk());
 		this.anti_thunder_structure_map.remove(chunk_loc);
 	}
-	
+
 	public void save_structure() {
-		
+
 	}
-	
+
 	public HashMap<Chunk_location, Anti_thunder_structure> get_anti_thunder_structure_map() {
 		return this.anti_thunder_structure_map;
 	}
