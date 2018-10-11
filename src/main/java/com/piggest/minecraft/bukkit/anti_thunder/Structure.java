@@ -30,7 +30,11 @@ public abstract class Structure {
 	public World get_world() {
 		return Bukkit.getWorld(world_name);
 	}
-
+	
+	public String get_world_name() {
+		return this.world_name;
+	}
+	
 	public Location get_core_location() {
 		return new Location(this.get_world(), this.x, this.y, this.z);
 	}

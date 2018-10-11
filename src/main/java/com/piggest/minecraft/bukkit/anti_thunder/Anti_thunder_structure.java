@@ -4,6 +4,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.type.Piston;
 import org.bukkit.entity.Player;
 
 public class Anti_thunder_structure extends Structure {
@@ -19,7 +21,12 @@ public class Anti_thunder_structure extends Structure {
 		Location core_loc = this.get_core_location();
 		int i = 0;
 		int j = 0;
-		if (core_loc.getBlock().getType() != Material.PISTON) {
+		BlockData core_data = core_loc.getBlock().getBlockData();
+		if (!(core_data instanceof Piston)) {
+			return false;
+		}
+		Piston core_piston_data = (Piston) core_data;
+		if (core_piston_data.getFacing().getModY() != 1) {
 			return false;
 		}
 		Location check_loc = core_loc.clone();
@@ -52,11 +59,19 @@ public class Anti_thunder_structure extends Structure {
 		return Bukkit.getPlayer(owner);
 	}
 
+	public String get_owner_name() {
+		return this.owner;
+	}
+
 	public boolean is_active() {
 		return this.active;
 	}
 
 	public void activate(boolean active) {
 		this.active = active;
+	}
+
+	public Chunk_location get_chunk_location() {
+		return Chunk_location.new_location(this.get_core_location().getChunk());
 	}
 }

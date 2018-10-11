@@ -1,6 +1,8 @@
 package com.piggest.minecraft.bukkit.anti_thunder;
 
 import java.io.File;
+import java.io.IOException;
+
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -16,6 +18,7 @@ public class Anti_thunder extends JavaPlugin {
 	private ConfigurationSection price = null;
 	private FileConfiguration config = null;
 	private FileConfiguration structure_config = null;
+	private File structure_file = null;
 	private final Load_structure_listener load_structure_listener = new Load_structure_listener(this);
 	private final Anti_thunder_listener anti_structure_listener = new Anti_thunder_listener(this);
 	private Structure_manager structure_manager = null;
@@ -43,7 +46,7 @@ public class Anti_thunder extends JavaPlugin {
 		this.config = getConfig();
 		this.use_vault = config.getBoolean("use-vault");
 		this.price = config.getConfigurationSection("price");
-		File structure_file = new File(this.getDataFolder(), "structure.yml");
+		this.structure_file = new File(this.getDataFolder(), "structure.yml");
 		this.structure_config = YamlConfiguration.loadConfiguration(structure_file);
 		this.structure_manager = new Structure_manager(this);
 		structure_manager.load_anti_thunder_structure_map();
@@ -63,7 +66,15 @@ public class Anti_thunder extends JavaPlugin {
 		pm.registerEvents(anti_structure_listener, this);
 
 	}
-
+	@Override
+	public void onDisable() {
+		structure_manager.save_anti_thunder_structure_map();
+		try {
+			structure_config.save(this.structure_file);
+		} catch (IOException e) {
+			getLogger().severe("结构文件保存错误!");
+		}
+	}
 	public Structure_manager get_structure_manager() {
 		return this.structure_manager;
 	}

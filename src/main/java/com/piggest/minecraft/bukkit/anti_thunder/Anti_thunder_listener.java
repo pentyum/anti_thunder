@@ -5,6 +5,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -19,21 +20,33 @@ public class Anti_thunder_listener implements Listener {
 
 	@EventHandler
 	public void on_thunder(LightningStrikeEvent event) {
+		if (event.isCancelled() == true) {
+			return;
+		}
 		Chunk_location chunk_loc = Chunk_location.new_location(event.getLightning().getLocation().getChunk());
 		plugin.getLogger().info("区块" + chunk_loc + "发生雷击");
-		Anti_thunder_structure structure = plugin.get_structure_manager().get_anti_thunder_structure_map()
-				.get(chunk_loc);
+		Anti_thunder_structure structure = plugin.get_structure_manager().structure_nearby(chunk_loc);
 		if (structure != null) {
-			plugin.getLogger().info("在当前区块发现防雷器");
+			plugin.getLogger().info("在雷击周围的3*3区块发现防雷器");
+			if (structure.completed() == false) {
+				plugin.getLogger().info("区块" + structure.get_chunk_location() + "的防雷器结构不完整，已经移除");
+				plugin.get_structure_manager().remove_structure(structure);
+				return;
+			}
 			if (structure.is_active() == true) {
 				event.setCancelled(true);
 				plugin.getLogger().info("已阻止雷击");
+			}else {
+				plugin.getLogger().info("防雷器未被激活，因此雷击未被阻止");
 			}
 		}
 	}
 
 	@EventHandler
 	public void on_powered(BlockPistonExtendEvent event) {
+		if (event.isCancelled() == true) {
+			return;
+		}
 		Chunk_location chunk_loc = Chunk_location.new_location(event.getBlock().getChunk());
 		Anti_thunder_structure structure = plugin.get_structure_manager().get_anti_thunder_structure_map()
 				.get(chunk_loc);
@@ -43,6 +56,7 @@ public class Anti_thunder_listener implements Listener {
 					structure.activate(true);
 					structure.get_owner().sendMessage("区块" + chunk_loc + "的防雷器已经激活");
 				} else {
+					structure.get_owner().sendMessage("区块" + chunk_loc + "的防雷器结构不完整，已经移除");
 					plugin.get_structure_manager().remove_structure(structure);
 				}
 			}
@@ -51,15 +65,19 @@ public class Anti_thunder_listener implements Listener {
 
 	@EventHandler
 	public void on_dispowered(BlockPistonRetractEvent event) {
+		if (event.isCancelled() == true) {
+			return;
+		}
 		Chunk_location chunk_loc = Chunk_location.new_location(event.getBlock().getChunk());
 		Anti_thunder_structure structure = plugin.get_structure_manager().get_anti_thunder_structure_map()
 				.get(chunk_loc);
 		if (structure != null) {
-			if (structure.get_core_location().equals(event.getBlock().getLocation())) {
+			if (structure.get_core_location().equals(event.getBlock().getLocation()) && structure.is_active() == true) {
 				if (structure.completed() == true) {
 					structure.activate(false);
 					structure.get_owner().sendMessage("区块" + chunk_loc + "的防雷器已经暂停");
 				} else {
+					structure.get_owner().sendMessage("区块" + chunk_loc + "的防雷器结构不完整，已经移除");
 					plugin.get_structure_manager().remove_structure(structure);
 				}
 			}
@@ -82,6 +100,21 @@ public class Anti_thunder_listener implements Listener {
 				} else {
 					player.sendMessage("区块" + chunk_loc + "已经有防雷器了，因此这个防雷器不会生效");
 				}
+			}
+		}
+	}
+
+	@EventHandler
+	public void on_break_piston(BlockBreakEvent event) {
+		Block break_block = event.getBlock();
+		if (break_block.getType() == Material.PISTON && event.isCancelled() == false) {
+			Chunk_location chunk_loc = Chunk_location.new_location(break_block.getChunk());
+			Anti_thunder_structure structure = plugin.get_structure_manager().get_anti_thunder_structure_map()
+					.get(chunk_loc);
+			if (structure != null) {
+				Player player = event.getPlayer();
+				player.sendMessage("区块" + chunk_loc + "的防雷器结构已被破坏");
+				plugin.get_structure_manager().remove_structure(structure);
 			}
 		}
 	}
