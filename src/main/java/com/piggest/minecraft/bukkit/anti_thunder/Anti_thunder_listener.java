@@ -36,7 +36,7 @@ public class Anti_thunder_listener implements Listener {
 			if (structure.is_active() == true) {
 				event.setCancelled(true);
 				plugin.getLogger().info("已阻止雷击");
-			}else {
+			} else {
 				plugin.getLogger().info("防雷器未被激活，因此雷击未被阻止");
 			}
 		}
@@ -52,12 +52,11 @@ public class Anti_thunder_listener implements Listener {
 				.get(chunk_loc);
 		if (structure != null) {
 			if (structure.get_core_location().equals(event.getBlock().getLocation())) {
-				if (structure.completed() == true) {
-					structure.activate(true);
+				if (structure.activate(true) == true) {
 					structure.get_owner().sendMessage("区块" + chunk_loc + "的防雷器已经激活");
 				} else {
-					structure.get_owner().sendMessage("区块" + chunk_loc + "的防雷器结构不完整，已经移除");
-					plugin.get_structure_manager().remove_structure(structure);
+					structure.get_owner().sendMessage("区块" + chunk_loc + "的防雷器激活失败");
+					event.setCancelled(true);
 				}
 			}
 		}
@@ -77,8 +76,8 @@ public class Anti_thunder_listener implements Listener {
 					structure.activate(false);
 					structure.get_owner().sendMessage("区块" + chunk_loc + "的防雷器已经暂停");
 				} else {
-					structure.get_owner().sendMessage("区块" + chunk_loc + "的防雷器结构不完整，已经移除");
 					plugin.get_structure_manager().remove_structure(structure);
+					structure.get_owner().sendMessage("区块" + chunk_loc + "的防雷器结构不完整，已经移除");
 				}
 			}
 		}
@@ -88,7 +87,7 @@ public class Anti_thunder_listener implements Listener {
 	public void on_put_piston(BlockPlaceEvent event) {
 		Block placed_block = event.getBlockPlaced();
 		if (placed_block.getType() == Material.PISTON && event.isCancelled() == false) {
-			Anti_thunder_structure structure = new Anti_thunder_structure(placed_block.getWorld().getName(),
+			Anti_thunder_structure structure = new Anti_thunder_structure(plugin, placed_block.getWorld().getName(),
 					placed_block.getX(), placed_block.getY(), placed_block.getZ());
 			if (structure.completed() == true) {
 				Player player = event.getPlayer();

@@ -35,7 +35,7 @@ public class Structure_manager {
 			Boolean active = (Boolean) one_structure.get("active");
 			Chunk_location chunk_loc = new Chunk_location(world_name, (Integer) one_structure.get("chunk-x"),
 					(Integer) one_structure.get("chunk-z"));
-			Anti_thunder_structure structure_to_load = new Anti_thunder_structure(world_name,
+			Anti_thunder_structure structure_to_load = new Anti_thunder_structure(plugin, world_name,
 					(Integer) one_structure.get("x"), (Integer) one_structure.get("y"),
 					(Integer) one_structure.get("z"));
 			structure_to_load.set_owner(owner);
@@ -59,6 +59,7 @@ public class Structure_manager {
 			one_structure.put("x", structure_to_save.get_core_location().getBlockX());
 			one_structure.put("y", structure_to_save.get_core_location().getBlockY());
 			one_structure.put("z", structure_to_save.get_core_location().getBlockZ());
+			structure_to_save.close();
 			structure_list.add(one_structure);
 			Bukkit.getLogger().info("区块" + chunk_loc + "的雷电保护器已经保存至配置中");
 		}
@@ -67,6 +68,7 @@ public class Structure_manager {
 
 	public void remove_structure(Anti_thunder_structure structure) {
 		Chunk_location chunk_loc = Chunk_location.new_location(structure.get_core_block().getChunk());
+		structure.close();
 		plugin.getLogger().info("内存中的区块" + chunk_loc + "的防雷器已经移除");
 		this.anti_thunder_structure_map.remove(chunk_loc);
 	}

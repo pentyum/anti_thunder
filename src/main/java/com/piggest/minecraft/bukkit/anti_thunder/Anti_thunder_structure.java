@@ -7,13 +7,21 @@ import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Piston;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import net.milkbowl.vault.economy.Economy;
 
 public class Anti_thunder_structure extends Structure {
 	private String owner;
 	private boolean active = false;
+	private Anti_thunder_runner runner = new Anti_thunder_runner(this);
 
-	public Anti_thunder_structure(String world_name, int x, int y, int z) {
-		super(world_name, x, y, z);
+	public Anti_thunder_structure(JavaPlugin plugin, String world_name, int x, int y, int z) {
+		super(plugin, world_name, x, y, z);
+	}
+
+	public Anti_thunder get_plugin() {
+		return (Anti_thunder) plugin;
 	}
 
 	@Override
@@ -21,11 +29,10 @@ public class Anti_thunder_structure extends Structure {
 		Location core_loc = this.get_core_location();
 		int i = 0;
 		int j = 0;
-		BlockData core_data = core_loc.getBlock().getBlockData();
-		if (!(core_data instanceof Piston)) {
+		Piston core_piston_data = this.get_core_piston();
+		if (core_piston_data == null) {
 			return false;
 		}
-		Piston core_piston_data = (Piston) core_data;
 		if (core_piston_data.getFacing().getModY() != 1) {
 			return false;
 		}
@@ -67,8 +74,48 @@ public class Anti_thunder_structure extends Structure {
 		return this.active;
 	}
 
-	public void activate(boolean active) {
+	public boolean activate(boolean active) {
+		if (active == true) {
+			if (this.completed() == true) {
+				if (runner.started() == false) {
+					runner.start();
+					plugin.getLogger().info("10秒后启动扣钱线程");
+					runner.runTaskTimerAsynchronously(plugin, 10 * 20, get_plugin().get_cycle() * 20);
+				} else {
+					Player owner = this.get_owner();
+					Economy economy = this.get_plugin().get_economy();
+					int price = this.get_plugin().get_price();
+					if (!economy.has(owner, price)) {
+						owner.sendMessage("你的钱不够，不能启动防雷器");
+						active = false;
+						return false;
+					}
+				}
+			} else {
+				this.get_plugin().get_structure_manager().remove_structure(this);
+				this.get_owner().sendMessage("区块" + get_chunk_location() + "的防雷器结构不完整，已经移除");
+				return false;
+			}
+		}
 		this.active = active;
+		return true;
+	}
+
+	public Piston get_core_piston() {
+		BlockData core_data = this.get_core_block().getBlockData();
+		if (!(core_data instanceof Piston)) {
+			return null;
+		}
+		return (Piston) core_data;
+	}
+
+	public void close() {
+		if (this.runner.started() == true) {
+			if (this.runner.isCancelled() == false) {
+				plugin.getLogger().info("停止扣钱线程");
+				this.runner.cancel();
+			}
+		}
 	}
 
 	public Chunk_location get_chunk_location() {

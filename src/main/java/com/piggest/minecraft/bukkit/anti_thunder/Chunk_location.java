@@ -33,7 +33,7 @@ public class Chunk_location {
 	public String toString() {
 		return "(" + this.world + "," + this.x + "," + this.z + ")";
 	}
-	
+
 	public static Chunk_location new_location(Chunk chunk) {
 		return new Chunk_location(chunk.getWorld().getName(), chunk.getX(), chunk.getZ());
 	}
