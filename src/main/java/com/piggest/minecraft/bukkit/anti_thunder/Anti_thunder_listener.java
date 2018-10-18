@@ -25,7 +25,7 @@ public class Anti_thunder_listener implements Listener {
 		}
 		Chunk_location chunk_loc = Chunk_location.new_location(event.getLightning().getLocation().getChunk());
 		plugin.getLogger().info("区块" + chunk_loc + "发生雷击");
-		Anti_thunder_structure structure = plugin.get_structure_manager().structure_nearby(chunk_loc);
+		Anti_thunder_structure structure = (Anti_thunder_structure) plugin.get_structure_manager().structure_nearby(chunk_loc,Anti_thunder_structure.class.getName());
 		if (structure != null) {
 			plugin.getLogger().info("在雷击周围的3*3区块发现防雷器");
 			if (structure.completed() == false) {
@@ -48,7 +48,7 @@ public class Anti_thunder_listener implements Listener {
 			return;
 		}
 		Chunk_location chunk_loc = Chunk_location.new_location(event.getBlock().getChunk());
-		Anti_thunder_structure structure = plugin.get_structure_manager().get_anti_thunder_structure_map()
+		Anti_thunder_structure structure = (Anti_thunder_structure) plugin.get_structure_manager().get_structure_map(Anti_thunder_structure.class.getName())
 				.get(chunk_loc);
 		if (structure != null) {
 			if (structure.get_core_location().equals(event.getBlock().getLocation())) {
@@ -68,7 +68,7 @@ public class Anti_thunder_listener implements Listener {
 			return;
 		}
 		Chunk_location chunk_loc = Chunk_location.new_location(event.getBlock().getChunk());
-		Anti_thunder_structure structure = plugin.get_structure_manager().get_anti_thunder_structure_map()
+		Anti_thunder_structure structure = (Anti_thunder_structure) plugin.get_structure_manager().get_structure_map(Anti_thunder_structure.class.getName())
 				.get(chunk_loc);
 		if (structure != null) {
 			if (structure.get_core_location().equals(event.getBlock().getLocation()) && structure.is_active() == true) {
@@ -108,7 +108,7 @@ public class Anti_thunder_listener implements Listener {
 		Block break_block = event.getBlock();
 		if (break_block.getType() == Material.PISTON && event.isCancelled() == false) {
 			Chunk_location chunk_loc = Chunk_location.new_location(break_block.getChunk());
-			Anti_thunder_structure structure = plugin.get_structure_manager().get_anti_thunder_structure_map()
+			Anti_thunder_structure structure = (Anti_thunder_structure) plugin.get_structure_manager().get_structure_map(Anti_thunder_structure.class.getName())
 					.get(chunk_loc);
 			if (structure != null) {
 				Player player = event.getPlayer();

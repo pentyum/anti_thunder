@@ -1,5 +1,7 @@
 package com.piggest.minecraft.bukkit.anti_thunder;
 
+import java.util.HashMap;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -8,12 +10,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public abstract class Structure {
 	protected JavaPlugin plugin;
-	private String world_name;
-	private int x;
-	private int y;
-	private int z;
-	private boolean loaded = false;
-
+	protected String world_name;
+	protected int x;
+	protected int y;
+	protected int z;
+	protected boolean loaded = false;
+	protected String name = "结构";
+	
 	public Structure(JavaPlugin plugin, String world_name, int x, int y, int z) {
 		this.plugin = plugin;
 		this.world_name = world_name;
@@ -21,7 +24,11 @@ public abstract class Structure {
 		this.y = y;
 		this.z = z;
 	}
-
+	
+	public String get_name() {
+		return this.name;
+	}
+	
 	public boolean is_loaded() {
 		return this.loaded;
 	}
@@ -47,4 +54,16 @@ public abstract class Structure {
 	}
 
 	public abstract boolean completed();
+
+	public abstract void close();
+	
+	public Chunk_location get_chunk_location() {
+		return Chunk_location.new_location(this.get_core_block().getChunk());
+	}
+	
+	public HashMap<Chunk_location,Structure> get_map(){
+		return ((Anti_thunder)this.plugin).get_structure_manager().get_structure_map(this.getClass().getName());
+	}
+
+	public abstract HashMap<String, Object> get_save();
 }

@@ -3,7 +3,6 @@ package com.piggest.minecraft.bukkit.anti_thunder;
 import java.io.File;
 import java.io.IOException;
 
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.PluginManager;
@@ -75,7 +74,7 @@ public class Anti_thunder extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
-		structure_manager.save_anti_thunder_structure_map();
+		structure_manager.save_structure_map();
 		try {
 			structure_config.save(this.structure_file);
 		} catch (IOException e) {

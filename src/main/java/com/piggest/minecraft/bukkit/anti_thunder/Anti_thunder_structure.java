@@ -1,5 +1,7 @@
 package com.piggest.minecraft.bukkit.anti_thunder;
 
+import java.util.HashMap;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -120,5 +122,19 @@ public class Anti_thunder_structure extends Structure {
 
 	public Chunk_location get_chunk_location() {
 		return Chunk_location.new_location(this.get_core_location().getChunk());
+	}
+
+	@Override
+	public HashMap<String, Object> get_save() {
+		HashMap<String, Object> one_structure = new HashMap<String, Object>();
+		one_structure.put("world", this.get_world_name());
+		one_structure.put("owner", this.get_owner_name());
+		one_structure.put("active", this.is_active());
+		one_structure.put("chunk-x", this.x);
+		one_structure.put("chunk-z", this.z);
+		one_structure.put("x", this.get_core_location().getBlockX());
+		one_structure.put("y", this.get_core_location().getBlockY());
+		one_structure.put("z", this.get_core_location().getBlockZ());
+		return one_structure;
 	}
 }

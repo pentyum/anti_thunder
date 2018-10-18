@@ -15,7 +15,7 @@ public class Load_structure_listener implements Listener {
 	@EventHandler
 	public void on_chunk_load(ChunkLoadEvent event) {
 		Chunk_location chunk_loc = Chunk_location.new_location(event.getChunk());
-		Structure structure = plugin.get_structure_manager().get_anti_thunder_structure_map().get(chunk_loc);
+		Structure structure = plugin.get_structure_manager().get_structure_map(Anti_thunder_structure.class.getName()).get(chunk_loc);
 		if (structure != null) {
 			structure.set_loaded(true);
 			plugin.getLogger().info("区块" + chunk_loc + "的防雷器已经加载");
@@ -25,7 +25,7 @@ public class Load_structure_listener implements Listener {
 	@EventHandler
 	public void on_chunk_unload(ChunkUnloadEvent event) {
 		Chunk_location chunk_loc = Chunk_location.new_location(event.getChunk());
-		Structure structure = plugin.get_structure_manager().get_anti_thunder_structure_map().get(chunk_loc);
+		Structure structure = plugin.get_structure_manager().get_structure_map(Anti_thunder_structure.class.getName()).get(chunk_loc);
 		if (structure != null) {
 			structure.set_loaded(false);
 			plugin.getLogger().info("区块" + chunk_loc + "的防雷器已经卸载");
