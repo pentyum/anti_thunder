@@ -28,7 +28,7 @@ public class Anti_thunder_listener implements Listener {
 		Anti_thunder_structure structure = (Anti_thunder_structure) plugin.get_structure_manager().structure_nearby(chunk_loc,Anti_thunder_structure.class.getName());
 		if (structure != null) {
 			plugin.getLogger().info("在雷击周围的3*3区块发现防雷器");
-			if (structure.completed() == false) {
+			if (structure.completed() == 0) {
 				plugin.getLogger().info("区块" + structure.get_chunk_location() + "的防雷器结构不完整，已经移除");
 				plugin.get_structure_manager().remove_structure(structure);
 				return;
@@ -72,7 +72,7 @@ public class Anti_thunder_listener implements Listener {
 				.get(chunk_loc);
 		if (structure != null) {
 			if (structure.get_core_location().equals(event.getBlock().getLocation()) && structure.is_active() == true) {
-				if (structure.completed() == true) {
+				if (structure.completed() > 0) {
 					structure.activate(false);
 					structure.send_msg_to_owner("区块" + chunk_loc + "的防雷器已经暂停");
 				} else {
@@ -89,7 +89,7 @@ public class Anti_thunder_listener implements Listener {
 		if (placed_block.getType() == Material.PISTON && event.isCancelled() == false) {
 			Anti_thunder_structure structure = new Anti_thunder_structure(plugin, placed_block.getWorld().getName(),
 					placed_block.getX(), placed_block.getY(), placed_block.getZ());
-			if (structure.completed() == true) {
+			if (structure.completed() > 0) {
 				Player player = event.getPlayer();
 				structure.set_owner(player.getName());
 				structure.set_loaded(true);
@@ -111,9 +111,11 @@ public class Anti_thunder_listener implements Listener {
 			Anti_thunder_structure structure = (Anti_thunder_structure) plugin.get_structure_manager().get_structure_map(Anti_thunder_structure.class.getName())
 					.get(chunk_loc);
 			if (structure != null) {
-				Player player = event.getPlayer();
-				player.sendMessage("区块" + chunk_loc + "的防雷器结构已被破坏");
-				plugin.get_structure_manager().remove_structure(structure);
+				if(break_block.getLocation().equals(structure.get_core_location())) {
+					Player player = event.getPlayer();
+					player.sendMessage("区块" + chunk_loc + "的防雷器结构已被破坏");
+					plugin.get_structure_manager().remove_structure(structure);
+				}
 			}
 		}
 	}

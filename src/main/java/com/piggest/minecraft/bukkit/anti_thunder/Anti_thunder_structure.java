@@ -32,23 +32,23 @@ public class Anti_thunder_structure extends Structure {
 	}
 
 	@Override
-	public boolean completed() {
+	public int completed() {
 		Location core_loc = this.get_core_location();
 		int i = 0;
 		int j = 0;
 		Piston core_piston_data = this.get_core_piston();
 		if (core_piston_data == null) {
-			return false;
+			return 0;
 		}
 		if (core_piston_data.getFacing().getModY() != 1) {
-			return false;
+			return 0;
 		}
 		Location check_loc = core_loc.clone();
 		check_loc.setY(core_loc.getY() + 1);
 		for (i = 1; i <= 5; i++) {
 			Block pole_block = check_loc.add(0, 1, 0).getBlock();
 			if (pole_block.getType() != Material.END_ROD) {
-				return false;
+				return 0;
 			}
 		}
 		check_loc.setY(core_loc.getY() - 1);
@@ -58,11 +58,11 @@ public class Anti_thunder_structure extends Structure {
 				check_loc.setX(core_loc.getX() + j);
 				Block pole_block = check_loc.getBlock();
 				if (pole_block.getType() != Material.IRON_BLOCK) {
-					return false;
+					return 0;
 				}
 			}
 		}
-		return true;
+		return 1;
 	}
 
 	public void set_owner(String owner) {
@@ -84,7 +84,7 @@ public class Anti_thunder_structure extends Structure {
 
 	public boolean activate(boolean active) {
 		if (active == true) {
-			if (this.completed() == true) {
+			if (this.completed() > 0) {
 				if (runner.started() == false) {
 					runner.start();
 					plugin.getLogger().info("10秒后启动扣钱线程");
@@ -163,6 +163,11 @@ public class Anti_thunder_structure extends Structure {
 		this.z = (Integer) one_structure.get("z");
 		this.set_owner(owner);
 		this.activate(active);
+	}
+
+	@Override
+	public Structure include_location(Location loc) {
+		return this;
 	}
 
 }

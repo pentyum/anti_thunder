@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 
 public class Structure_manager {
 	private Anti_thunder plugin = null;
@@ -14,14 +15,15 @@ public class Structure_manager {
 
 	public Structure_manager(Anti_thunder plugin) {
 		this.plugin = plugin;
-		this.register_structure_class(Anti_thunder_structure.class);
+		this.register_structure_class(Anti_thunder_structure.class.getName());
+		this.register_structure_class(Recycle_bin.class.getName());
 	}
 
 	public boolean add_new_structure(Structure structure) {
 		Chunk_location chunk_loc = structure.get_chunk_location();
 		HashMap<Chunk_location, Structure> structures_map = structure.get_map();
 		if (structures_map == null) {
-			structures_map = register_structure_class(structure.getClass());
+			structures_map = register_structure_class(structure.getClass().getName());
 			structures_map.put(chunk_loc, structure);
 			plugin.getLogger().info("区块" + chunk_loc + "的" + structure.get_name() + "已经加载进内存");
 			return true;
@@ -34,49 +36,52 @@ public class Structure_manager {
 			}
 		}
 	}
-	
-	public HashMap<Chunk_location, Structure> register_structure_class(Class<? extends Structure> structure_class) {
+
+	public HashMap<Chunk_location, Structure> register_structure_class(String structure_class_name) {
 		HashMap<Chunk_location, Structure> structures_map = new HashMap<Chunk_location, Structure>();
-		this.structure_type_map.put(structure_class.getName(), structures_map);
-		plugin.getLogger().info("已注册"+structure_class.getName()+"结构");
+		this.structure_type_map.put(structure_class_name, structures_map);
+		plugin.getLogger().info("已注册" + structure_class_name + "结构");
 		return structures_map;
 	}
-	
+
 	public void load_structure_map() {
 		for (Entry<String, HashMap<Chunk_location, Structure>> entry : this.structure_type_map.entrySet()) {
 			String structure_class_name = entry.getKey();
 			Structure structure_to_load = null;
 			try {
 				@SuppressWarnings("unchecked")
-				Class<? extends Structure> structure_class = (Class<? extends Structure>) Class.forName(structure_class_name);
-				plugin.getLogger().info("已获取"+structure_class_name+"的类");
-				structure_to_load = structure_class.newInstance();
-				plugin.getLogger().info("已创建"+structure_class_name+"的实例");
-				structure_to_load.set_info(plugin, "world", 0, 0, 0);
-				plugin.getLogger().info("正在从"+structure_class_name+"的配置文件中加载数据");
-				List<Map<?, ?>> structure_list = plugin.get_structure_config().getMapList(structure_class_name);
+				Class<? extends Structure> structure_class = (Class<? extends Structure>) Class
+						.forName(structure_class_name);
+				plugin.getLogger().info("已获取" + structure_class_name + "的类");
+				plugin.getLogger().info("正在从" + structure_class_name + "的配置文件中加载数据");
+				List<Map<?, ?>> structure_list = plugin.get_structure_config().getMapList(structure_class_name.replace('.', '-'));
+				plugin.getLogger().info(structure_list.toString());
 				for (Map<?, ?> one_structure : structure_list) {
+					structure_to_load = structure_class.newInstance();
+					plugin.getLogger().info("已创建" + structure_class_name + "的实例");
+					structure_to_load.set_info(plugin, "world", 0, 0, 0);
 					structure_to_load.load_save(one_structure);
-					plugin.getLogger().info("区块" + structure_to_load.get_chunk_location() + "的" + structure_to_load.get_name() + "已经从配置中加载");
+					plugin.getLogger().info("区块" + structure_to_load.get_chunk_location() + "的"
+							+ structure_to_load.get_name() + "已经从配置中加载");
 					this.add_new_structure(structure_to_load);
 				}
 			} catch (ClassNotFoundException e) {
-				plugin.getLogger().severe(structure_class_name+"必须继承Structure类");
-				break;
+				plugin.getLogger().severe(structure_class_name + "必须继承Structure类");
+				continue;
 			} catch (InstantiationException e) {
-				plugin.getLogger().severe(structure_class_name+"实例生成错误");
-				break;
+				plugin.getLogger().severe(structure_class_name + "实例生成错误");
+				continue;
 			} catch (IllegalAccessException e) {
-				plugin.getLogger().severe(structure_class_name+"实例生成器无法访问");
-				break;
+				plugin.getLogger().severe(structure_class_name + "实例生成器无法访问");
+				continue;
 			}
-			
+
 		}
 	}
 
 	public void save_structure_map() {
-		ArrayList<HashMap<String, ?>> structure_list = new ArrayList<HashMap<String, ?>>();
 		for (Entry<String, HashMap<Chunk_location, Structure>> entry : this.structure_type_map.entrySet()) {
+			ArrayList<HashMap<String, ?>> structure_list = new ArrayList<HashMap<String, ?>>();
 			String structure_class_name = entry.getKey();
 			HashMap<Chunk_location, Structure> structures_map = entry.getValue();
 			for (Entry<Chunk_location, Structure> entry2 : structures_map.entrySet()) {
@@ -87,7 +92,7 @@ public class Structure_manager {
 				structure_list.add(one_structure);
 				Bukkit.getLogger().info("区块" + chunk_loc + "的" + structure.get_name() + "已经保存至配置中");
 			}
-			plugin.get_structure_config().set(structure_class_name, structure_list);
+			plugin.get_structure_config().set(structure_class_name.replace('.', '-'), structure_list);
 		}
 	}
 
@@ -103,7 +108,7 @@ public class Structure_manager {
 		return this.structure_type_map;
 	}
 
-	public Structure structure_nearby(Chunk_location chunk_loc,String structure_class_name) {
+	public Structure structure_nearby(Chunk_location chunk_loc, String structure_class_name) {
 		int i;
 		int j;
 		Chunk_location check_loc = new Chunk_location(chunk_loc.world, chunk_loc.x, chunk_loc.z);
@@ -119,6 +124,15 @@ public class Structure_manager {
 			}
 		}
 		return null;
+	}
+
+	public Structure in_structure(Location loc, Class<? extends Structure> structure_class) {
+		Chunk_location chunk_loc = Chunk_location.new_location(loc.getChunk());
+		Structure structure_in_chunk = this.get_structure_map(structure_class.getName()).get(chunk_loc);
+		if (structure_in_chunk == null) {
+			return null;
+		}
+		return structure_in_chunk.include_location(loc);
 	}
 
 	public HashMap<Chunk_location, Structure> get_structure_map(String name) {

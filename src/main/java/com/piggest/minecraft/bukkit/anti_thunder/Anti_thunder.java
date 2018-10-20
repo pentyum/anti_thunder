@@ -20,6 +20,7 @@ public class Anti_thunder extends JavaPlugin {
 	private File structure_file = null;
 	private final Load_structure_listener load_structure_listener = new Load_structure_listener(this);
 	private final Anti_thunder_listener anti_structure_listener = new Anti_thunder_listener(this);
+	private final Recycle_listener recycle_listener = new Recycle_listener(this);
 	private Structure_manager structure_manager = null;
 	private int cycle = 3600;
 
@@ -54,7 +55,6 @@ public class Anti_thunder extends JavaPlugin {
 		this.structure_file = new File(this.getDataFolder(), "structure.yml");
 		this.structure_config = YamlConfiguration.loadConfiguration(structure_file);
 		this.structure_manager = new Structure_manager(this);
-		structure_manager.load_structure_map();
 
 		if (use_vault == true) {
 			getLogger().info("使用Vault");
@@ -65,11 +65,11 @@ public class Anti_thunder extends JavaPlugin {
 		} else {
 			getLogger().info("不使用Vault");
 		}
-
+		structure_manager.load_structure_map();
 		PluginManager pm = getServer().getPluginManager();
 		pm.registerEvents(load_structure_listener, this);
 		pm.registerEvents(anti_structure_listener, this);
-
+		pm.registerEvents(recycle_listener, this);
 	}
 
 	@Override
@@ -81,7 +81,7 @@ public class Anti_thunder extends JavaPlugin {
 			getLogger().severe("结构文件保存错误!");
 		}
 	}
-
+	
 	public Structure_manager get_structure_manager() {
 		return this.structure_manager;
 	}

@@ -19,7 +19,7 @@ public class Anti_thunder_runner extends BukkitRunnable {
 
 	public void run() {
 		OfflinePlayer owner = structure.get_owner();
-		if (structure.completed() == true) {
+		if (structure.completed() > 0) {
 			if (structure.is_active() == true) {
 				Economy economy = structure.get_plugin().get_economy();
 				int price = structure.get_plugin().get_price();

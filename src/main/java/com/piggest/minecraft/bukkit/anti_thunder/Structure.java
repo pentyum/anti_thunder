@@ -21,7 +21,7 @@ public abstract class Structure {
 	public Structure() {
 
 	}
-
+	
 	public Structure(JavaPlugin plugin, String world_name, int x, int y, int z) {
 		this.set_info(plugin, world_name, x, y, z);
 	}
@@ -33,7 +33,7 @@ public abstract class Structure {
 		this.y = y;
 		this.z = z;
 	}
-
+	
 	public String get_name() {
 		if (this.name == "" || this.name == null) {
 			return this.getClass().getName();
@@ -66,7 +66,7 @@ public abstract class Structure {
 		return get_core_location().getBlock();
 	}
 
-	public abstract boolean completed();
+	public abstract int completed();
 
 	public abstract void close();
 
@@ -77,8 +77,15 @@ public abstract class Structure {
 	public HashMap<Chunk_location, Structure> get_map() {
 		return ((Anti_thunder) this.plugin).get_structure_manager().get_structure_map(this.getClass().getName());
 	}
-
+	
+	public Block get_block(int relative_x,int relative_y,int relative_z) {
+		Location loc = this.get_core_location().add(relative_x, relative_y, relative_z);
+		return loc.getBlock();
+	}
+	
 	public abstract HashMap<String, Object> get_save();
 
 	public abstract void load_save(Map<?, ?> one_structure);
+
+	protected abstract Structure include_location(Location loc);
 }
