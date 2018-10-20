@@ -54,7 +54,7 @@ public class Anti_thunder extends JavaPlugin {
 		this.structure_file = new File(this.getDataFolder(), "structure.yml");
 		this.structure_config = YamlConfiguration.loadConfiguration(structure_file);
 		this.structure_manager = new Structure_manager(this);
-		structure_manager.load_anti_thunder_structure_map();
+		structure_manager.load_structure_map();
 
 		if (use_vault == true) {
 			getLogger().info("使用Vault");

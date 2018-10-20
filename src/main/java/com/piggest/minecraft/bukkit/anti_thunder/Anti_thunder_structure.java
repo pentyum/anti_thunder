@@ -1,14 +1,15 @@
 package com.piggest.minecraft.bukkit.anti_thunder;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Piston;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import net.milkbowl.vault.economy.Economy;
@@ -20,6 +21,10 @@ public class Anti_thunder_structure extends Structure {
 
 	public Anti_thunder_structure(JavaPlugin plugin, String world_name, int x, int y, int z) {
 		super(plugin, world_name, x, y, z);
+	}
+
+	public Anti_thunder_structure() {
+		super();
 	}
 
 	public Anti_thunder get_plugin() {
@@ -64,8 +69,9 @@ public class Anti_thunder_structure extends Structure {
 		this.owner = owner;
 	}
 
-	public Player get_owner() {
-		return Bukkit.getPlayer(owner);
+	@SuppressWarnings("deprecation")
+	public OfflinePlayer get_owner() {
+		return Bukkit.getOfflinePlayer(owner);
 	}
 
 	public String get_owner_name() {
@@ -84,23 +90,31 @@ public class Anti_thunder_structure extends Structure {
 					plugin.getLogger().info("10秒后启动扣钱线程");
 					runner.runTaskTimerAsynchronously(plugin, 10 * 20, get_plugin().get_cycle() * 20);
 				} else {
-					Player owner = this.get_owner();
+					OfflinePlayer owner = this.get_owner();
 					Economy economy = this.get_plugin().get_economy();
 					int price = this.get_plugin().get_price();
 					if (!economy.has(owner, price)) {
-						owner.sendMessage("你的钱不够，不能启动防雷器");
+						this.send_msg_to_owner("你的钱不够，不能启动防雷器");
 						active = false;
 						return false;
 					}
 				}
 			} else {
 				this.get_plugin().get_structure_manager().remove_structure(this);
-				this.get_owner().sendMessage("区块" + get_chunk_location() + "的防雷器结构不完整，已经移除");
+				this.send_msg_to_owner("区块" + get_chunk_location() + "的防雷器结构不完整，已经移除");
 				return false;
 			}
 		}
 		this.active = active;
 		return true;
+	}
+
+	public void send_msg_to_owner(String msg) {
+		if (this.get_owner().isOnline()) {
+			this.get_owner().getPlayer().sendMessage(msg);
+		} else {
+			this.plugin.getLogger().info("[" + this.owner + "]" + msg);
+		}
 	}
 
 	public Piston get_core_piston() {
@@ -130,11 +144,25 @@ public class Anti_thunder_structure extends Structure {
 		one_structure.put("world", this.get_world_name());
 		one_structure.put("owner", this.get_owner_name());
 		one_structure.put("active", this.is_active());
-		one_structure.put("chunk-x", this.x);
-		one_structure.put("chunk-z", this.z);
-		one_structure.put("x", this.get_core_location().getBlockX());
-		one_structure.put("y", this.get_core_location().getBlockY());
-		one_structure.put("z", this.get_core_location().getBlockZ());
+		one_structure.put("chunk-x", this.get_core_location().getChunk().getX());
+		one_structure.put("chunk-z", this.get_core_location().getChunk().getZ());
+		one_structure.put("x", this.x);
+		one_structure.put("y", this.y);
+		one_structure.put("z", this.z);
 		return one_structure;
 	}
+
+	@Override
+	public void load_save(Map<?, ?> one_structure) {
+		String world_name = (String) one_structure.get("world");
+		String owner = (String) one_structure.get("owner");
+		Boolean active = (Boolean) one_structure.get("active");
+		this.world_name = world_name;
+		this.x = (Integer) one_structure.get("x");
+		this.y = (Integer) one_structure.get("y");
+		this.z = (Integer) one_structure.get("z");
+		this.set_owner(owner);
+		this.activate(active);
+	}
+
 }

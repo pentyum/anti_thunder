@@ -53,9 +53,9 @@ public class Anti_thunder_listener implements Listener {
 		if (structure != null) {
 			if (structure.get_core_location().equals(event.getBlock().getLocation())) {
 				if (structure.activate(true) == true) {
-					structure.get_owner().sendMessage("区块" + chunk_loc + "的防雷器已经激活");
+					structure.send_msg_to_owner("区块" + chunk_loc + "的防雷器已经激活");
 				} else {
-					structure.get_owner().sendMessage("区块" + chunk_loc + "的防雷器激活失败");
+					structure.send_msg_to_owner("区块" + chunk_loc + "的防雷器激活失败");
 					event.setCancelled(true);
 				}
 			}
@@ -74,10 +74,10 @@ public class Anti_thunder_listener implements Listener {
 			if (structure.get_core_location().equals(event.getBlock().getLocation()) && structure.is_active() == true) {
 				if (structure.completed() == true) {
 					structure.activate(false);
-					structure.get_owner().sendMessage("区块" + chunk_loc + "的防雷器已经暂停");
+					structure.send_msg_to_owner("区块" + chunk_loc + "的防雷器已经暂停");
 				} else {
 					plugin.get_structure_manager().remove_structure(structure);
-					structure.get_owner().sendMessage("区块" + chunk_loc + "的防雷器结构不完整，已经移除");
+					structure.send_msg_to_owner("区块" + chunk_loc + "的防雷器结构不完整，已经移除");
 				}
 			}
 		}
