@@ -9,14 +9,18 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public class Recycle_bin extends Structure {
 	private double stored_money = 0;
 	private double limited_money = 10000;
 	private double price = 0.2;
+	private long last_active_time = System.currentTimeMillis();
+	private long recycle_interval = 1000;
 
 	public Recycle_bin() {
 		super();
+		this.last_active_time = System.currentTimeMillis();
 	}
 
 	public Recycle_bin(Anti_thunder plugin, String world_name, int x, int y, int z) {
@@ -63,6 +67,8 @@ public class Recycle_bin extends Structure {
 		HashMap<String, Object> one_structure = new HashMap<String, Object>();
 		one_structure.put("world", this.get_world_name());
 		one_structure.put("stored_money", this.stored_money);
+		one_structure.put("limited_money", this.limited_money);
+		one_structure.put("price", this.price);
 		one_structure.put("chunk-x", this.get_core_location().getChunk().getX());
 		one_structure.put("chunk-z", this.get_core_location().getChunk().getZ());
 		one_structure.put("x", this.x);
@@ -75,11 +81,15 @@ public class Recycle_bin extends Structure {
 	public void load_save(Map<?, ?> one_structure) {
 		String world_name = (String) one_structure.get("world");
 		double stored_money = (Double) one_structure.get("stored_money");
+		double limited_money = (Double) one_structure.get("limited_money");
+		double price = (Double) one_structure.get("price");
 		this.world_name = world_name;
 		this.x = (Integer) one_structure.get("x");
 		this.y = (Integer) one_structure.get("y");
 		this.z = (Integer) one_structure.get("z");
 		this.stored_money = stored_money;
+		this.limited_money = limited_money;
+		this.price = price;
 	}
 
 	@Override
@@ -87,7 +97,7 @@ public class Recycle_bin extends Structure {
 		int relative_x = loc.getBlockX() - this.x;
 		int relative_y = loc.getBlockY() - this.y;
 		int relative_z = loc.getBlockZ() - this.z;
-		//plugin.getLogger().info("rx="+relative_x+"ry="+relative_y+"rz="+relative_z);
+		// plugin.getLogger().info("rx="+relative_x+"ry="+relative_y+"rz="+relative_z);
 		if (relative_y <= 2) {
 			if (Math.abs(relative_x) <= 2 && Math.abs(relative_z) <= 2) {
 				if (Math.abs(relative_x) == 2 && Math.abs(relative_z) == 2) {
@@ -122,11 +132,24 @@ public class Recycle_bin extends Structure {
 
 	public void recycle_entity(Entity entity) {
 		int num = 1;
+		long current_time = System.currentTimeMillis();
+		if (current_time - this.last_active_time <= this.recycle_interval) {
+			plugin.getLogger().info("已达到单位时间回收上限(每" + this.recycle_interval + "ms 1个)");
+			return;
+		}
 		if (entity instanceof Item) {
 			Item item = (Item) entity;
-			num = item.getItemStack().getAmount();
+			ItemStack itemstack = item.getItemStack();
+			String name = item.getName();
+			if (name.contains("Carpet") || name.contains("Rail") || name.contains("Egg")) {
+				num = 0;
+			} else {
+				num = itemstack.getAmount();
+			}
 		}
+		plugin.getLogger().info("已回收" + num + "个" + entity.getName());
 		this.add_money(num * this.price);
+		this.last_active_time = System.currentTimeMillis();
 	}
 
 	public void discharge_all(Player player) {

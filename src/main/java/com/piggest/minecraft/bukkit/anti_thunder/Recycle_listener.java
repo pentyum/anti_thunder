@@ -29,13 +29,12 @@ public class Recycle_listener implements Listener {
 			num = item.getItemStack().getAmount();
 		}
 		if (structure != null) {
-			plugin.getLogger().info("实体" + entity.getName() + "在回收器被破坏了");
-			plugin.getLogger().info("数量:" + num);
-			plugin.getLogger().info("伤害:" + event.getDamage());
 			Recycle_bin recycle_bin = (Recycle_bin) structure;
 			if (recycle_bin.completed() > 0) {
 				if (event.getDamage() >= 4) {
-					plugin.getLogger().info("实体被回收了");
+					plugin.getLogger().info("实体" + entity.getName() + "在回收器受到了有效伤害");
+					plugin.getLogger().info("实体数量:" + num);
+					plugin.getLogger().info("伤害:" + event.getDamage());
 					recycle_bin.recycle_entity(event.getEntity());
 				}
 			} else {
@@ -56,13 +55,13 @@ public class Recycle_listener implements Listener {
 				Player player = event.getPlayer();
 				if (recycle_bin.completed() > 0) {
 					if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
-						player.sendMessage("已回收" + recycle_bin.get_stored_money());
+						player.sendMessage("已从回收站中回收" + recycle_bin.get_stored_money());
 						recycle_bin.discharge_all(player);
 					} else {
-						player.sendMessage("当前已储存" + recycle_bin.get_stored_money());
+						player.sendMessage("当前回收站已储存" + recycle_bin.get_stored_money());
 					}
 				} else {
-					player.sendMessage("区块" + recycle_bin.get_chunk_location() + "的回收器结构已被破坏");
+					player.sendMessage("区块" + recycle_bin.get_chunk_location() + "的回收站结构已被破坏");
 					plugin.get_structure_manager().remove_structure(recycle_bin);
 				}
 			}
@@ -78,7 +77,9 @@ public class Recycle_listener implements Listener {
 						clicked_block.getX(), clicked_block.getY(), clicked_block.getZ());
 				if (recycle_bin.completed() > 0) {
 					if (plugin.get_structure_manager().add_new_structure(recycle_bin) == true) {
-						event.getPlayer().sendMessage("区块" + recycle_bin.get_chunk_location() + "的回收器已经建成");
+						event.getPlayer().sendMessage("区块" + recycle_bin.get_chunk_location() + "的回收站已经建成");
+					} else {
+						event.getPlayer().sendMessage("区块" + recycle_bin.get_chunk_location() + "已经有回收站了，不能再建了");
 					}
 				}
 			}
