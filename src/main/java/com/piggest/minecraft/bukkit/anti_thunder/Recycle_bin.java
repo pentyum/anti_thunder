@@ -7,6 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 
 public class Recycle_bin extends Structure {
@@ -86,6 +87,7 @@ public class Recycle_bin extends Structure {
 		int relative_x = loc.getBlockX() - this.x;
 		int relative_y = loc.getBlockY() - this.y;
 		int relative_z = loc.getBlockZ() - this.z;
+		//plugin.getLogger().info("rx="+relative_x+"ry="+relative_y+"rz="+relative_z);
 		if (relative_y <= 2) {
 			if (Math.abs(relative_x) <= 2 && Math.abs(relative_z) <= 2) {
 				if (Math.abs(relative_x) == 2 && Math.abs(relative_z) == 2) {
@@ -119,13 +121,18 @@ public class Recycle_bin extends Structure {
 	}
 
 	public void recycle_entity(Entity entity) {
-		this.add_money(this.price);
+		int num = 1;
+		if (entity instanceof Item) {
+			Item item = (Item) entity;
+			num = item.getItemStack().getAmount();
+		}
+		this.add_money(num * this.price);
 	}
 
 	public void discharge_all(Player player) {
+		this.get_plugin().get_economy().depositPlayer(player, this.stored_money);
 		this.discharge_money(this.stored_money);
 		this.plugin.getLogger()
 				.info(player.getName() + "从" + this.get_chunk_location() + "的回收器中回收了" + this.stored_money);
-		this.get_plugin().get_economy().depositPlayer(player, this.stored_money);
 	}
 }

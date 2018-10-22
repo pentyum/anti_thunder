@@ -2,6 +2,8 @@ package com.piggest.minecraft.bukkit.anti_thunder;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,19 +22,28 @@ public class Recycle_listener implements Listener {
 	public void on_recycle_entity(EntityDamageEvent event) {
 		Structure structure = plugin.get_structure_manager().in_structure(event.getEntity().getLocation(),
 				Recycle_bin.class);
-		plugin.getLogger().info("有实体被破坏了");
+		Entity entity = event.getEntity();
+		int num = 1;
+		if (entity instanceof Item) {
+			Item item = (Item) entity;
+			num = item.getItemStack().getAmount();
+		}
 		if (structure != null) {
-			plugin.getLogger().info("实体在有回收器被破坏了");
+			plugin.getLogger().info("实体" + entity.getName() + "在回收器被破坏了");
+			plugin.getLogger().info("数量:" + num);
+			plugin.getLogger().info("伤害:" + event.getDamage());
 			Recycle_bin recycle_bin = (Recycle_bin) structure;
 			if (recycle_bin.completed() > 0) {
-				plugin.getLogger().info("实体被回收了");
-				recycle_bin.recycle_entity(event.getEntity());
+				if (event.getDamage() >= 4) {
+					plugin.getLogger().info("实体被回收了");
+					recycle_bin.recycle_entity(event.getEntity());
+				}
 			} else {
 				plugin.get_structure_manager().remove_structure(recycle_bin);
 			}
 		}
 	}
-	
+
 	@EventHandler
 	public void on_discharge(PlayerInteractEvent event) {
 		if (event.isCancelled() == false
